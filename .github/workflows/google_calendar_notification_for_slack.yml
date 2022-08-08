@@ -1,0 +1,48 @@
+name: google_calendar_notification_for_slack
+
+# トリガーイベント
+on:
+  # 1. main ブランチへのプッシュ: 通知がうざいから停止中
+  # push:
+  #   branches:
+  #     - main
+  # 2. GitHub 上の手動実行
+  workflow_dispatch:
+  # 3. crontab
+  # schedule:
+  #   # 1 時間毎
+  #   - cron: "00 * * * *"
+
+jobs:
+  google_calendar_notification_for_slack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.9"
+          architecture: "x64"
+      - name: Get Python version
+        run: python -V
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run google_calendar_notification_for_slack.py
+        env:
+          SERVICE_ACCOUNT_EMAIL: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
+          SLACK_MENTION: ${{ secrets.SLACK_MENTION }}
+          WEBHOOK_URL_DEFAULT: ${{ secrets.WEBHOOK_URL_DEFAULT }}
+          WEBHOOK_URL_GOOGLE_CALENDAR_TODO_NOTIFICATION: ${{ secrets.WEBHOOK_URL_GOOGLE_CALENDAR_TODO_NOTIFICATION }}
+          TYPE: ${{ secrets.TYPE }}
+          PROJECT_ID: ${{ secrets.PROJECT_ID }}
+          PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          CLIENT_EMAIL: ${{ secrets.CLIENT_EMAIL }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          AUTH_URI: ${{ secrets.AUTH_URI }}
+          TOKEN_URI: ${{ secrets.TOKEN_URI }}
+          AUTH_PROVIDER_X509_CERT_URL: ${{ secrets.AUTH_PROVIDER_X509_CERT_URL }}
+          CLIENT_X509_CERT_URL: ${{ secrets.CLIENT_X509_CERT_URL }}
+          IS_DEBUG: ${{ secrets.IS_DEBUG }}
+        run: python google_calendar_notification_for_slack.py
