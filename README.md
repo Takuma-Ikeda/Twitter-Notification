@@ -17,3 +17,10 @@ pipenv shell
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
   - ローカルで実行するときに `.env` を読み込む
 
+## Reference
+
+- https://developer.twitter.com/en
+
+### 備考
+
+- ツイートの `create_at` で取れるパラメータは JST ではない
