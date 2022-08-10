@@ -1,12 +1,9 @@
-from __future__ import print_function
-from unittest import result
 from config import Config
 import json
 import requests
-import time
 import tweepy
-import datetime
-import re
+from pytz import timezone
+from dateutil import parser
 
 
 class MyTwitter():
@@ -84,6 +81,30 @@ class MyTwitter():
             result.append(tweet.data)
 
         return result
+
+    def search_recent_tweets(self, query, start_time, end_time, max_results=10):
+        result = []
+
+        # Paginator を経由すると max_results は無効化される。件数は flatten(limit=max_results) のほうで制御している
+        for tweet in tweepy.Paginator(
+            self.config.client.search_recent_tweets,
+            query=query,
+            tweet_fields=[
+                # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
+                'public_metrics',
+                'created_at'
+            ],
+            start_time=start_time,
+            end_time=end_time,  # 指定しない場合は現在日時 - 30 秒になる
+            max_results=max_results
+        ).flatten(limit=max_results):
+            result.append(tweet.data)
+
+        return result
+
+    def like(self, tweets):
+        for tweet in tweets:
+            self.config.client.like(tweet['id'])
 
     """
     あるユーザ ID に対するメンションツイートを取得する
@@ -171,7 +192,7 @@ class MyTwitter():
         return result
 
     """
-    週間実績、および一週間以内の LIKE 数によるツイートランキングの文字列を作成
+    週間実績、および一週間以内の LIKE 数によるツイートランキングの文字列を作成 (Notion)
     """
     def get_str_for_notion(self, users_tweets_one_week_ago, me, tweets_count, mention_count, between, followers):
         follower_count = followers['follower_count']
@@ -194,8 +215,7 @@ class MyTwitter():
             retweet_count = tweet['public_metrics']['retweet_count']
             id = tweet['id']
             url = f'https://twitter.com/{username}/status/{id}/analytics'
-            tokyo_tz = datetime.timezone(datetime.timedelta(hours=9))
-            created_at = datetime.datetime.strptime(tweet['created_at'], '%Y-%m-%dT%H:%M:%S.000Z').replace(tzinfo=tokyo_tz)
+            created_at_jst = parser.parse(tweet['created_at']).astimezone(timezone('Asia/Tokyo')).strftime("%Y-%m-%d %H:%M:%S")
 
             if len(text) > 30:
                 result += f'|No.{rank}|[{text[0:30]}...]({url})'
@@ -204,10 +224,43 @@ class MyTwitter():
 
             rank += 1
 
-            result += f'|{like_count}|{retweet_count}|{created_at}||'
+            result += f'|{like_count}|{retweet_count}|{created_at_jst}||'
             result += '\n'
 
         result += '```'
+        return result
+
+    """
+    週間実績、および一週間以内の LIKE 数によるツイートランキングの文字列を作成 (Slack)
+    """
+    def get_str_for_slack(self, users_tweets_one_week_ago, me, tweets_count, mention_count, between, followers):
+        follower_count = followers['follower_count']
+        username = me['username']
+        rank = 1
+        how_many = 20
+        like_ranking = self.__get_like_ranking(how_many, users_tweets_one_week_ago)
+
+        result = f'Between: *{between}*\nTweet Count: *{tweets_count}*\nMention Count: *{mention_count}*\nFollower Count: *{follower_count}*\n\n'
+
+        for tweet in like_ranking:
+            # ツイート内の改行コードを削除
+            text = tweet['text'].replace('\n', '')
+            like_count = tweet['public_metrics']['like_count']
+            retweet_count = tweet['public_metrics']['retweet_count']
+            id = tweet['id']
+            url = f'https://twitter.com/{username}/status/{id}/analytics'
+            created_at_jst = parser.parse(tweet['created_at']).astimezone(timezone('Asia/Tokyo')).strftime("%Y-%m-%d %H:%M:%S")
+
+            result += f'{rank}. [Like] *{like_count}* [Retweet] *{retweet_count}* [Created_at] *{created_at_jst}* '
+
+            if len(text) > 30:
+                result += f'[Tweet] <{url}|{text[0:30]}...> '
+            else:
+                result += f'[Tweet] <{url}|{text}> '
+
+            rank += 1
+            result += '\n'
+
         return result
 
     """
@@ -223,6 +276,9 @@ class MyTwitter():
             'icon_emoji': bot_emoji,
         }))
 
+    """
+    いいねランキング順にソートして List に内包して返却
+    """
     def __get_like_ranking(self, how_many, users_tweets_one_week_ago):
         like_ranking = []
         like_dict = {}

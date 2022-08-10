@@ -1,4 +1,3 @@
-import secrets
 from my_twitter import MyTwitter
 import datetime
 from datetime import timedelta
@@ -10,7 +9,7 @@ class TwitterNotificationForSlack:
         tokyo_tz = datetime.timezone(datetime.timedelta(hours=9))
         now = datetime.datetime.now(tokyo_tz)
         self.yesterday = now - timedelta(days=1)
-        self.one_week_ago = now - timedelta(days=8)
+        self.one_week_ago = now - timedelta(days=7)
 
     def run(self):
         twitter = MyTwitter()
@@ -50,11 +49,11 @@ class TwitterNotificationForSlack:
 
         yesterday = self.yesterday.replace(hour=23, minute=59, second=59).strftime('%Y-%m-%d')
 
-        str_for_notion = twitter.get_ytd_str_for_notion(users_all_tweets_ytd, me, tweets_count_ytd, mention_count_ytd, yesterday)
+        str_for_slack = twitter.get_ytd_str_for_notion(users_all_tweets_ytd, me, tweets_count_ytd, mention_count_ytd, yesterday)
 
-        if str_for_notion is not None:
-            twitter.slack_post(str_for_notion, 'Yesterday\'s Twitter Result', ':baby_chick:', twitter.config.webhook_urls['twitter_notification'])
-            print('Slack Post About Yesterday\'s Tweets Done!')
+        if str_for_slack is not None:
+            twitter.slack_post(str_for_slack, 'Yesterday\'s Twitter Result', ':baby_chick:', twitter.config.webhook_urls['twitter_notification'])
+            print('Slack Post About Yesterday\'s Tweets for Slack Done!')
         else:
             print('No Tweets!')
 
@@ -90,7 +89,15 @@ class TwitterNotificationForSlack:
 
         if str_for_notion is not None:
             twitter.slack_post(str_for_notion, 'Weekly Twitter Result', ':bird:', twitter.config.webhook_urls['twitter_notification_for_notion'])
-            print('Slack Post About Weekly Tweets Done!')
+            print('Slack Post About Weekly Tweets for Notion Done!')
+        else:
+            print('No Tweets!')
+
+        str_for_slack = twitter.get_str_for_slack(users_all_tweets_one_week_ago, me, tweets_count_one_week_ago, mention_count_one_week_ago, between, followers)
+
+        if str_for_notion is not None:
+            twitter.slack_post(str_for_slack, 'Weekly Twitter Result', ':bird:', twitter.config.webhook_urls['twitter_notification'])
+            print('Slack Post About Weekly Tweets for Slack Done!')
         else:
             print('No Tweets!')
 
