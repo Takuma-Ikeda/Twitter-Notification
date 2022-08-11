@@ -10,11 +10,11 @@ on:
   workflow_dispatch:
   # 3. crontab
   schedule:
-  # 1 時間毎
+    # 1 時間毎
     - cron: "00 * * * *"
 
 jobs:
-  twitter_auto_like:
+  twitter_auto_like_by_query:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -27,7 +27,7 @@ jobs:
         run: python -V
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run twitter_auto_like.py
+      - name: Run twitter_auto_like_by_query.py
         env:
           BEARER_TOKEN: ${{ secrets.BEARER_TOKEN }}
           API_KEY: ${{ secrets.API_KEY }}
@@ -39,4 +39,4 @@ jobs:
           WEBHOOK_URL_TWITTER_NOTIFICATION: ${{ secrets.WEBHOOK_URL_TWITTER_NOTIFICATION }}
           WEBHOOK_URL_TWITTER_NOTIFICATION_FOR_NOTION: ${{ secrets.WEBHOOK_URL_TWITTER_NOTIFICATION_FOR_NOTION }}
           IS_DEBUG: ${{ secrets.IS_DEBUG }}
-        run: python twitter_auto_like.py
+        run: python twitter_auto_like_by_query.py
