@@ -1,6 +1,6 @@
 # Twitter-Notification
 
-- 1 時間おきに、特定キーワード・ハッシュタグの最新ツイート 20 件ずついいねする
+- 30 分おきに、特定キーワード・ハッシュタグの最新ツイート 20 件ずついいねする
 
 ## 動作環境
 
@@ -15,7 +15,6 @@ pipenv shell
 
 - [tweepy](https://github.com/tweepy/tweepy)
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
-  - ローカルで実行するときに `.env` を読み込む
 - [pytz](https://github.com/stub42/pytz)
 - [python-dateutil](https://github.com/dateutil/dateutil)
 

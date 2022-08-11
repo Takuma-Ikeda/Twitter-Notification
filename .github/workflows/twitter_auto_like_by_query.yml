@@ -10,8 +10,8 @@ on:
   workflow_dispatch:
   # 3. crontab
   schedule:
-    # 1 時間毎
-    - cron: "00 * * * *"
+    # 30 分毎
+    - cron: "*/30 * * * *"
 
 jobs:
   twitter_auto_like_by_query:
