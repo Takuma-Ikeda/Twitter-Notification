@@ -292,19 +292,6 @@ class MyTwitter():
         return result
 
     """
-    Slack チャンネルに Post する
-    """
-    def slack_post(self, text, bot_name, bot_emoji, webhook_url):
-        if self.config.is_debug:
-            webhook_url = self.config.webhook_urls['default']
-
-        requests.post(webhook_url, json.dumps({
-            'text': text,
-            'username': bot_name,
-            'icon_emoji': bot_emoji,
-        }))
-
-    """
     いいねランキング順にソートして List に内包して返却
     """
     def __get_like_ranking(self, how_many, users_tweets_one_week_ago):
