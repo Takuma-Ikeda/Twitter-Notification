@@ -16,7 +16,7 @@ class TwitterAutoLikeByQuery:
         # NOTE: https://developer.twitter.com/en/docs/twitter-api/rate-limits
         api_limit = 50
         api_limit_count = 0
-        max_results = 10
+        max_results = 20
         queries = ['#駆け出しエンジニアと繋がりたい', 'エンジニア']
 
         for query in queries:
