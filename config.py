@@ -29,6 +29,8 @@ class Config():
         auth.set_access_token(os.getenv('ACCESS_TOKEN'), os.getenv('ACCESS_TOKEN_SECRET'))
         self.api = tweepy.API(auth)
 
+        self.auto_like_list_id = os.getenv('AUTO_LIKE_LIST_ID')
+
         self.webhook_urls = {
             'default': os.getenv('WEBHOOK_URL_DEFAULT'),
             'twitter_notification': os.getenv('WEBHOOK_URL_TWITTER_NOTIFICATION'),

@@ -160,6 +160,34 @@ class MyTwitter():
         return result
 
     """
+    作成したリストをフォローしているユーザを取得できる
+    プライベートなリストはエラーが返ってくるので注意
+    """
+    def get_list_followers(self, list_id):
+        return self.config.client.get_list_followers(list_id)
+
+    """
+    作成したリスト内の昨日ツイートを取得する
+    プライベートなリストはエラーが返ってくるので注意
+    """
+    def get_list_tweets(self, list_id, max_results=10):
+        result = []
+
+        # get_list_tweets をそのまま実行すると最新 10 件しかとれないので、Paginator を利用する
+        for tweet in tweepy.Paginator(
+            self.config.client.get_list_tweets,
+            list_id,
+            tweet_fields=[
+                'public_metrics',
+                'created_at'
+            ],
+            max_results=max_results
+        ).flatten(limit=max_results):
+            result.append(tweet.data)
+
+        return result
+
+    """
     いいねされたことのあるツイートを取得
     """
     def get_liked_tweets(self, id):

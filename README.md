@@ -1,6 +1,10 @@
 # Twitter-Notification
 
-- xxx
+- 1 日 1 回、一週間の Twitter レポートを Slack に配信する
+  - Notion 表示用の形式
+  - Slack 表示用の形式
+- 1 日 1 回、特定リストの最新ツイート 10 件をいいねする
+- 1 時間おきに、特定キーワード・ハッシュタグの最新ツイート 10 件をいいねする
 
 ## 動作環境
 
@@ -16,11 +20,10 @@ pipenv shell
 - [tweepy](https://github.com/tweepy/tweepy)
 - [python-dotenv](https://github.com/theskumar/python-dotenv)
   - ローカルで実行するときに `.env` を読み込む
+- [pytz](https://github.com/stub42/pytz)
+- [python-dateutil](https://github.com/dateutil/dateutil)
 
-## Reference
+## Tweepy Reference
 
 - https://developer.twitter.com/en
-
-### 備考
-
-- ツイートの `create_at` で取れるパラメータは JST ではない
+  - 利用している Twitter API は 2 系
