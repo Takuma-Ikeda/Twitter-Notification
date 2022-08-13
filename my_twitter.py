@@ -1,3 +1,4 @@
+from distutils.command.config import config
 from config import Config
 import json
 import requests
@@ -11,6 +12,12 @@ class MyTwitter():
 
     def __init__(self):
         self.config = Config()
+        self.tweet_fields = [
+            # 'organic_metrics'  # インプレッションなど含まれる。しかしエンタープライズでしか利用できない
+            'public_metrics',
+            'created_at',
+            'author_id',
+        ]
 
     """
     自分自身の情報を返却する
@@ -69,11 +76,7 @@ class MyTwitter():
         for tweet in tweepy.Paginator(
             self.config.client.get_users_tweets,
             id=id,
-            tweet_fields=[
-                # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
-                'public_metrics',
-                'created_at'
-            ],
+            tweet_fields=self.tweet_fields,
             start_time=start_time,
             end_time=end_time,  # 指定しない場合は現在日時 - 30 秒になる
             exclude=None if not exclude else exclude
@@ -89,11 +92,7 @@ class MyTwitter():
         for tweet in tweepy.Paginator(
             self.config.client.search_recent_tweets,
             query=query,
-            tweet_fields=[
-                # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
-                'public_metrics',
-                'created_at'
-            ],
+            tweet_fields=self.tweet_fields,
             start_time=start_time,
             end_time=end_time,  # 指定しない場合は現在日時 - 30 秒になる
             max_results=max_results
@@ -104,7 +103,10 @@ class MyTwitter():
 
     def like(self, tweets):
         for tweet in tweets:
-            self.config.client.like(tweet['id'])
+            # 自分のツイートは無視する
+            if tweet['author_id'] == self.config.my_author_id:
+                continue
+        self.config.client.like(tweet['id'])
 
     """
     あるユーザ ID に対するメンションツイートを取得する
@@ -116,11 +118,7 @@ class MyTwitter():
         for tweet in tweepy.Paginator(
             self.config.client.get_users_mentions,
             id=id,
-            tweet_fields=[
-                # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
-                'public_metrics',
-                'created_at'
-            ],
+            tweet_fields=self.tweet_fields,
             start_time=start_time,
             end_time=end_time,  # 指定しない場合は現在日時 - 30 秒になる
         ).flatten(limit=250):
@@ -128,18 +126,11 @@ class MyTwitter():
 
         return result
 
-    # home_timeline
-    # mentions_timeline
-
     """
     ツイート ID からツイート情報を取得する
     """
     def get_tweet(self, id):
-        return self.config.client.get_tweet(id=id, tweet_fields= [
-            # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
-            'public_metrics',
-            'created_at'
-        ]).data.data
+        return self.config.client.get_tweet(id=id, tweet_fields=self.tweet_fields).data.data
 
     """
     複数のツイート ID からツイート情報を取得する
@@ -147,11 +138,7 @@ class MyTwitter():
     def get_tweets(self, ids):
         result = []
 
-        res = self.config.client.get_tweets(ids=ids, tweet_fields=[
-            # 'organic_metrics'  # インプレッションだが、こちらはエンタープライズでしか利用できない
-            'public_metrics',
-            'created_at'
-        ])
+        res = self.config.client.get_tweets(ids=ids, tweet_fields=self.tweet_fields)
 
         for tweets in res:
             for tweet in tweets:
@@ -177,10 +164,7 @@ class MyTwitter():
         for tweet in tweepy.Paginator(
             self.config.client.get_list_tweets,
             list_id,
-            tweet_fields=[
-                'public_metrics',
-                'created_at'
-            ],
+            tweet_fields=self.tweet_fields,
             max_results=max_results
         ).flatten(limit=max_results):
             result.append(tweet.data)

@@ -35,4 +35,5 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
           ACCESS_TOKEN_SECRET: ${{ secrets.ACCESS_TOKEN_SECRET }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          MY_AUTHOR_ID: ${{ secrets.MY_AUTHOR_ID }}
         run: python twitter_auto_like_by_query.py
